@@ -388,6 +388,14 @@ body.nav-open .main-nav{ transform: translateX(0); }
   margin-bottom: var(--space-3);
 }
 .kicker-light{ color: var(--text-muted); }
+.hero-kicker{
+  color: var(--text);
+  background: rgba(0,0,0,0.5);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-pill);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
 
 .hero-title{
   font-family: var(--font-display);
