@@ -95,7 +95,10 @@
       'communication.p3': 'We can organize everything before the shoot, so the filming process itself can be simple and comfortable.',
 
       'about.title': 'ABOUT KS VISUALS',
-      'about.text': 'KS VISUALS creates short-form video content for businesses in Vlorë. The goal is simple: to create modern and visually engaging content that helps your business look better online.',
+      'about.text1': "Hi, I'm the person behind KS VISUALS.",
+      'about.text2': "I've loved creating content for many years and have always done it as a passion and a hobby.",
+      'about.text3': "I'm an artist, and I also worked as a photographer in the past. I believe this helps me notice beauty even in the smallest details and capture it in a natural, atmospheric way.",
+      'about.text4': "My goal is to create videos that don't just show your business, but also capture its mood, atmosphere and character.",
       'about.statement': '<span>YOU RUN YOUR BUSINESS.</span><br><span>I CREATE THE CONTENT.</span>',
 
       'ready.title': 'READY TO POST',
