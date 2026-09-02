@@ -250,22 +250,11 @@
 
     var activeCard = null;
 
-    // Instagram's embed.js loads async; retry a few times in case a card is
-    // opened before it has finished loading. Give up silently after that —
-    // the blockquote's own built-in "view on Instagram" card still works.
-    function processEmbeds(attempts) {
-      if (window.instgrm && window.instgrm.Embeds) {
-        window.instgrm.Embeds.process();
-      } else if (attempts > 0) {
-        setTimeout(function () { processEmbeds(attempts - 1); }, 200);
-      }
-    }
-
     function collapse(card) {
       var playBtn = card.querySelector('.portfolio-play');
       var embed = card.querySelector('.portfolio-embed');
       var inner = card.querySelector('.portfolio-embed-inner');
-      inner.innerHTML = ''; // stops any playing audio/video
+      inner.innerHTML = ''; // removing the iframe stops playback
       embed.hidden = true;
       playBtn.hidden = false;
       card.classList.remove('is-active');
@@ -273,22 +262,27 @@
     }
 
     function expand(card) {
-      var template = card.querySelector('template.ig-embed-source');
-      if (!template || !template.content || !template.content.firstElementChild) return;
+      var playBtn = card.querySelector('.portfolio-play');
+      var youtubeId = playBtn ? playBtn.getAttribute('data-youtube-id') : null;
+      if (!youtubeId) return;
 
       if (activeCard && activeCard !== card) collapse(activeCard);
 
-      var playBtn = card.querySelector('.portfolio-play');
       var embed = card.querySelector('.portfolio-embed');
       var inner = card.querySelector('.portfolio-embed-inner');
 
+      var iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube.com/embed/' + youtubeId + '?autoplay=1&playsinline=1&rel=0&modestbranding=1';
+      iframe.title = playBtn.getAttribute('aria-label') || 'YouTube video';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+
       inner.innerHTML = '';
-      inner.appendChild(template.content.cloneNode(true));
+      inner.appendChild(iframe);
       playBtn.hidden = true;
       embed.hidden = false;
       card.classList.add('is-active');
       activeCard = card;
-      processEmbeds(10);
 
       card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
@@ -306,12 +300,85 @@
     if (el) el.textContent = new Date().getFullYear();
   }
 
+  function initFaqAccordion() {
+    var items = document.querySelectorAll('.faq-item');
+    if (!items.length) return;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    items.forEach(function (item) {
+      var summary = item.querySelector('summary');
+      var content = item.querySelector('.faq-content');
+      if (!summary || !content) return;
+
+      var animation = null;
+      var isClosing = false;
+      var isExpanding = false;
+
+      function onFinish(openState) {
+        item.open = openState;
+        animation = null;
+        isClosing = false;
+        isExpanding = false;
+        item.style.height = '';
+        item.style.overflow = '';
+      }
+
+      function expand() {
+        item.style.overflow = 'hidden';
+        isExpanding = true;
+        var startHeight = item.offsetHeight;
+        var endHeight = summary.offsetHeight + content.offsetHeight;
+        if (animation) animation.cancel();
+        animation = item.animate(
+          { height: [startHeight + 'px', endHeight + 'px'] },
+          { duration: 260, easing: 'cubic-bezier(.22,.61,.36,1)' }
+        );
+        animation.onfinish = function () { onFinish(true); };
+        animation.oncancel = function () { isExpanding = false; };
+      }
+
+      function open() {
+        item.style.height = item.offsetHeight + 'px';
+        item.open = true;
+        window.requestAnimationFrame(function () { window.requestAnimationFrame(expand); });
+      }
+
+      function close() {
+        item.style.overflow = 'hidden';
+        isClosing = true;
+        var startHeight = item.offsetHeight;
+        var endHeight = summary.offsetHeight;
+        if (animation) animation.cancel();
+        animation = item.animate(
+          { height: [startHeight + 'px', endHeight + 'px'] },
+          { duration: 220, easing: 'cubic-bezier(.22,.61,.36,1)' }
+        );
+        animation.onfinish = function () { onFinish(false); };
+        animation.oncancel = function () { isClosing = false; };
+      }
+
+      summary.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (reduceMotion || typeof item.animate !== 'function') {
+          item.open = !item.open;
+          return;
+        }
+        if (isClosing || !item.open) {
+          open();
+        } else if (isExpanding || item.open) {
+          close();
+        }
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initLanguage();
     initNav();
     initReveal();
     initHeroVideo();
     initPortfolioInline();
+    initFaqAccordion();
     initFooterYear();
   });
 })();
